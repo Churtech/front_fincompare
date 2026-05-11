@@ -41,11 +41,21 @@ const ProjectionDrawer: React.FC<ProjectionDrawerProps> = ({ comparisonItem, isO
 
   // Rendimiento Real = Fisher: ((1 + neto) / (1 + ipc) - 1)
   const ipc = metricsData?.data?.inflation_rate ?? 0;
-  const realReturn = (item.real_return && item.real_return > 0)
-    ? item.real_return
-    : ipc > 0
-      ? ((1 + netReturn / 100) / (1 + ipc / 100) - 1) * 100
-      : 0;
+  
+  let realReturn = 0;
+  if (item.real_return && item.real_return > 0) {
+    realReturn = item.real_return;
+  } else if (ipc > 0) {
+    // Ecuación de Fisher: r_real = ((1 + r_nominal) / (1 + h)) - 1
+    realReturn = ((1 + netReturn / 100) / (1 + ipc / 100) - 1) * 100;
+  } else {
+    // Si no hay inflación reportada o es 0, el rendimiento real es el neto
+    realReturn = netReturn;
+  }
+
+  // Guardia de Sanidad Financiera: Un retorno real de +3000% es un error de data.
+  // Solo mostramos el número si es coherente (entre -100% y +100%)
+  const isRealReturnValid = realReturn > -100 && realReturn < 100;
 
   const handleCopySummary = () => {
     const text = `Análisis FinCompare:\nActivo: ${entityName} ${ticker ? `(${ticker})` : ''}\nInversión: ${formatCurrency(initialInvestment)}\nRetorno Neto: ${netReturn}%\nGanancia Proyectada: ${formatCurrency(gainNet)}`;
@@ -143,25 +153,29 @@ const ProjectionDrawer: React.FC<ProjectionDrawerProps> = ({ comparisonItem, isO
                           </p>
                         </div>
                       </div>
-                      {realReturn > 0 ? (
+                      {isRealReturnValid ? (
                         <span className="text-xl font-mono font-bold text-emerald-600">+{realReturn.toFixed(2)}%</span>
                       ) : (
                         <span className="text-sm font-mono font-bold text-slate-400">N/D</span>
                       )}
                     </div>
-                    {realReturn > 0 ? (
+                    {isRealReturnValid ? (
                       <>
                         <div className="w-full h-1.5 bg-slate-50 rounded-full overflow-hidden mb-2">
                           <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(100, (realReturn / 8) * 100)}%` }} />
                         </div>
-                        {ipc > 0 && (
+                        {ipc > 0 ? (
                           <p className="text-[10px] text-slate-400">
                             Tu dinero crece <span className="font-bold text-emerald-600">{realReturn.toFixed(2)}%</span> por encima de la inflación
                           </p>
+                        ) : (
+                          <p className="text-[10px] text-slate-400 italic">Comparado contra base de inflación 0% (Dato pendiente)</p>
                         )}
                       </>
                     ) : (
-                      <p className="text-[10px] text-slate-400">Sin datos de IPC disponibles en el servidor</p>
+                      <p className="text-[10px] text-amber-600 font-medium bg-amber-50 p-2 rounded-lg">
+                        El motor de cálculo está auditando la inflación actual para este activo.
+                      </p>
                     )}
                   </div>
 
@@ -221,19 +235,24 @@ const ProjectionDrawer: React.FC<ProjectionDrawerProps> = ({ comparisonItem, isO
             {/* Footer de Acción */}
             <div className="p-8 border-t border-slate-100 bg-white space-y-4">
               <button 
-                onClick={handleAction}
+                onClick={handleCopySummary}
                 className="w-full py-5 bg-slate-900 text-white rounded-[24px] font-bold text-sm hover:bg-primary hover:shadow-2xl hover:shadow-primary/20 transition-all flex items-center justify-center gap-3 group active:scale-95"
               >
-                Ejecutar Inversión en {entityName}
-                <ArrowRight size={18} className="group-hover:translate-x-1.5 transition-transform" />
+                {copied ? <Check size={18} className="text-emerald-400" /> : <Copy size={18} />}
+                {copied ? 'Análisis Copiado' : 'Generar Ficha para Comité'}
               </button>
+              
               <button 
-                onClick={handleCopySummary}
-                className="w-full py-4 bg-white text-slate-400 border border-slate-100 rounded-[24px] font-bold text-xs hover:bg-slate-50 transition-all flex items-center justify-center gap-2"
+                onClick={handleAction}
+                className="w-full py-4 bg-white text-slate-500 border border-slate-200 rounded-[24px] font-bold text-xs hover:bg-slate-50 hover:text-primary hover:border-primary/30 transition-all flex items-center justify-center gap-2 group"
               >
-                {copied ? <Check size={14} className="text-emerald-500" /> : <Copy size={14} />}
-                {copied ? 'Análisis Copiado' : 'Copiar Ficha Técnica para Comité'}
+                Contactar Asesor o Ver en {entityName}
+                <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
               </button>
+              
+              <p className="text-[9px] text-center text-slate-400 uppercase font-bold tracking-widest pt-2">
+                FinCompare · Terminal de Inteligencia Institucional
+              </p>
             </div>
           </motion.div>
         </>

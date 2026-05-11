@@ -223,6 +223,11 @@ const BacktestModal: React.FC<{ portfolio: Portfolio; isOpen: boolean; onClose: 
                           <p className='text-3xl font-mono font-bold text-white relative tracking-tight'>
                             {(result.sharpe_ratio || 0).toFixed(2)}
                           </p>
+                          <div className='absolute inset-0 bg-slate-900/95 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center p-6 z-10'>
+                            <p className='text-[10px] text-slate-300 leading-relaxed text-center'>
+                              Indica cuánto retorno extra obtienes por cada unidad de riesgo.
+                            </p>
+                          </div>
                         </div>
 
                         <div className='bg-white border border-slate-100 p-6 rounded-[32px] shadow-sm flex flex-col justify-center relative overflow-hidden group transition-all hover:shadow-md hover:border-primary/10'>
@@ -405,9 +410,11 @@ const PortfolioCard: React.FC<{ initialPortfolio: Portfolio; onBacktest: () => v
           <span className='text-[8px] font-bold text-slate-400 uppercase tracking-widest block mb-2'>Volatilidad Anual</span>
           <p className='text-2xl font-mono font-bold text-primary'>{(portfolio.metrics?.volatility || 0).toFixed(2)}%</p>
         </div>
-        <div className='p-6 bg-slate-50 rounded-2xl border border-slate-100'>
+        <div className='p-6 bg-slate-50 rounded-2xl border border-slate-100 relative'>
           <span className='text-[8px] font-bold text-slate-400 uppercase tracking-widest block mb-2'>Sharpe Ratio</span>
-          <p className='text-2xl font-mono font-bold text-primary'>{(portfolio.metrics?.sharpe_ratio || 0).toFixed(2)}</p>
+          <p className='text-2xl font-mono font-bold text-primary'>
+            {(portfolio.metrics?.sharpe_ratio || 0).toFixed(2)}
+          </p>
         </div>
         <div className='p-6 bg-slate-900 rounded-2xl text-white shadow-xl shadow-primary/10'>
           <span className='text-[8px] font-bold text-white/40 uppercase tracking-widest block mb-2'>Max Drawdown</span>

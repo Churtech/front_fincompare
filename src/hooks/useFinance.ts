@@ -213,14 +213,15 @@ export const useMarketMetrics = () => {
       const { data } = await api.get<ApiResponse<any>>('/metrics');
       console.log('Market Metrics API Response:', data);
       
-      // Mapeo defensivo para asegurar que capturamos la inflación
+      // Mapeo defensivo ultra-robusto
       if (data && data.data) {
+        // Forzamos el mapeo de inflation_rate. Si viene 0 o null, intentamos fallbacks.
         data.data.inflation_rate = Number(
-          data.data.inflation_rate || 
-          data.data.inflation || 
-          data.data.ipc || 
-          0
+          data.data.inflation_rate !== undefined ? data.data.inflation_rate : 
+          (data.data.inflation || data.data.ipc || 0)
         );
+          
+        console.log('Final Mapped IPC:', data.data.inflation_rate);
       }
       
       return data as ApiResponse<MarketMetrics>;

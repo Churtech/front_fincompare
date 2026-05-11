@@ -145,10 +145,10 @@ const MetricsView: React.FC = () => {
                    <span className='text-[10px] font-bold uppercase tracking-widest opacity-60'>Inflación Proyectada</span>
                 </div>
                 <h4 className='text-2xl font-serif mb-4'>
-                   {isLoading ? 'Sincronizando...' : `5.68% IPC Anual`}
+                   {isLoading ? 'Sincronizando...' : `${(metrics?.inflation_rate || 0).toFixed(2)}% IPC Anual`}
                 </h4>
                 <p className='text-sm text-slate-400 leading-relaxed'>
-                   Tasa de inflación reportada para el último periodo.
+                   Tasa de inflación reportada para el último periodo (DANE).
                 </p>
              </div>
              <div className='bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex flex-col justify-between'>

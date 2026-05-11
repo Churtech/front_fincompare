@@ -31,7 +31,9 @@ const AssetsView: React.FC = () => {
   const { data: historyResponse } = useAssetHistory(activeAsset?.asset?.ticker || '');
   const history = historyResponse?.data || [];
 
-  const chartData = useMemo(() => history.map(p => p?.close || 0), [history]);
+  // Usar normalized_price (Base 100) si existe, si no fallback al precio de cierre
+  const isNormalized = history.length > 0 && history[0].normalized_price !== undefined;
+  const chartData = useMemo(() => history.map(p => isNormalized ? (p.normalized_price || 100) : (p.close || 0)), [history, isNormalized]);
   const chartLabels = useMemo(() => history.map(p => p?.date ? new Date(p.date).toLocaleDateString() : '---'), [history]);
 
   const currentPrice = useMemo(() => {
@@ -48,25 +50,36 @@ const AssetsView: React.FC = () => {
       borderWidth: 1,
       textStyle: { color: '#111827', fontSize: 11, fontFamily: 'Inter' },
       padding: [8, 12],
+      formatter: (params: any) => {
+        const val = params[0].value;
+        return `<div class="font-bold text-[10px] text-slate-400 mb-1 uppercase">${params[0].name}</div>
+                <div class="flex items-center justify-between gap-4">
+                  <span class="text-xs font-medium">${isNormalized ? 'Base 100' : 'Precio'}</span>
+                  <span class="text-xs font-bold text-primary">${isNormalized ? val.toFixed(2) : formatCurrency(val)}</span>
+                </div>`;
+      }
     },
     grid: { left: '1%', right: '1%', bottom: '5%', top: '5%', containLabel: false },
     xAxis: { type: 'category', boundaryGap: false, show: false, data: chartLabels },
     yAxis: { type: 'value', show: false, min: 'dataMin', max: 'dataMax' },
     series: [{
-      name: 'Precio',
+      name: isNormalized ? 'Base 100' : 'Precio',
       type: 'line',
       smooth: true,
       symbol: 'none',
-      lineStyle: { width: 2, color: '#111827' },
+      lineStyle: { width: 2.5, color: '#111827' },
       areaStyle: {
         color: {
           type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-          colorStops: [{ offset: 0, color: 'rgba(17, 24, 39, 0.04)' }, { offset: 1, color: 'rgba(17, 24, 39, 0)' }]
+          colorStops: [{ offset: 0, color: 'rgba(17, 24, 39, 0.06)' }, { offset: 1, color: 'rgba(17, 24, 39, 0)' }]
         }
       },
       data: chartData
     }]
   };
+
+  const formatCurrency = (val: number) => 
+    new Intl.NumberFormat('es-CO', { style: 'currency', currency: activeAsset?.asset?.currency || 'USD', minimumFractionDigits: 2 }).format(val);
 
   if (loadingAssets && !assetsResponse) {
     return (
@@ -86,6 +99,11 @@ const AssetsView: React.FC = () => {
              <div className='flex items-center gap-1.5 px-2 py-0.5 bg-emerald-50 border border-emerald-100 rounded text-[9px] font-bold text-emerald-700 uppercase tracking-widest'>
                <Database size={12} /> Datos Reales
              </div>
+             {isNormalized && (
+               <div className='px-2 py-0.5 bg-slate-900 text-white rounded text-[9px] font-bold uppercase tracking-widest'>
+                 Base 100 Activa
+               </div>
+             )}
           </div>
         </div>
       </div>
@@ -202,7 +220,7 @@ const AssetsView: React.FC = () => {
                 <div className='lg:col-span-2 bg-white border border-slate-100 p-6 shadow-sm rounded-2xl'>
                   <div className='flex items-center gap-2 mb-6'>
                     <Activity size={16} className='text-primary' />
-                    <h4 className='text-[10px] font-bold text-slate-500 uppercase tracking-widest'>Historial Sincronizado</h4>
+                    <h4 className='text-[10px] font-bold text-slate-500 uppercase tracking-widest'>Historial {isNormalized ? 'Normalizado' : 'Sincronizado'}</h4>
                   </div>
                   <div className='h-[300px] w-full'>
                     <ReactECharts option={chartOption} style={{ height: '100%', width: '100%' }} />

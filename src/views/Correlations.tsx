@@ -62,7 +62,8 @@ const CorrelationsView: React.FC = () => {
   const assets = assetsResponse?.data || [];
 
   const currentTRM = trm?.current != null && trm.current > 0 ? trm.current : metrics?.trm_current;
-  const currentInflation = 5.68; // TODO: Hardcodeado (DANE abril 2026) mientras se arregla el backend
+  const currentInflation = metrics?.inflation_rate || 0;
+  const bestCDTRate = metrics?.best_cdt_rate || 0;
 
   const chartOption = {
     backgroundColor: 'transparent',
@@ -88,20 +89,100 @@ const CorrelationsView: React.FC = () => {
     grid: { top: '15%', left: '10%', right: '10%', bottom: '15%' },
     tooltip: {
       trigger: 'item',
+      backgroundColor: 'rgba(255, 255, 255, 0.98)',
+      borderColor: '#e2e8f0',
+      borderWidth: 1,
+      padding: [10, 14],
+      textStyle: { color: '#1e293b', fontSize: 12 },
       formatter: (params: any) => `
-        <div class="p-2">
-          <p class="text-[10px] font-bold text-slate-400 uppercase">${params.data[2]}</p>
-          <p class="text-xs font-bold text-primary">Retorno: ${params.data[1].toFixed(2)}%</p>
-          <p class="text-xs text-slate-500">Volatilidad: ${params.data[0].toFixed(2)}%</p>
+        <div style="min-width: 140px">
+          <p style="margin:0; font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em">${params.data[3]}</p>
+          <p style="margin:4px 0; font-weight: 800; color: #0f172a; font-size: 13px">${params.data[2]}</p>
+          <div style="display: flex; justify-content: space-between; margin-top: 8px; border-top: 1px solid #f1f5f9; pt: 8px">
+            <span style="color: #64748b; font-size: 11px">Retorno:</span>
+            <span style="font-weight: bold; color: #10b981; font-size: 11px">${params.data[1].toFixed(2)}%</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 4px">
+            <span style="color: #64748b; font-size: 11px">Volatilidad:</span>
+            <span style="font-weight: bold; color: #0f172a; font-size: 11px">${params.data[0].toFixed(2)}%</span>
+          </div>
         </div>`
     },
-    xAxis: { name: 'Volatilidad (%)', nameLocation: 'middle', nameGap: 30, splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } } },
-    yAxis: { name: 'Retorno (%)', nameLocation: 'middle', nameGap: 40, splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } } },
+    xAxis: { 
+      name: 'Volatilidad (%)', 
+      nameLocation: 'middle', 
+      nameGap: 30, 
+      axisLabel: { fontSize: 10, color: '#94a3b8' },
+      splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } } 
+    },
+    yAxis: { 
+      name: 'Retorno (%)', 
+      nameLocation: 'middle', 
+      nameGap: 40, 
+      axisLabel: { fontSize: 10, color: '#94a3b8' },
+      splitLine: { lineStyle: { type: 'dashed', color: '#f1f5f9' } } 
+    },
     series: [{
-      symbolSize: (data: any) => Math.sqrt(data[0]) * 5 + 10,
-      data: assets.map(a => [a.volatility, a.annual_return, a.asset.ticker]),
+      symbolSize: (data: any) => {
+        const size = Math.sqrt(data[0]) * 4 + 8;
+        return Math.min(Math.max(size, 10), 30);
+      },
+      data: assets.map(a => [a.volatility, a.annual_return, a.asset.name, a.asset.ticker]),
       type: 'scatter',
-      itemStyle: { color: '#0F172A', opacity: 0.8, shadowBlur: 10, shadowColor: 'rgba(15, 23, 42, 0.2)' }
+      itemStyle: { 
+        color: (params: any) => {
+          return params.data[1] > bestCDTRate ? '#10B981' : '#0F172A';
+        },
+        opacity: 0.75, 
+        shadowBlur: 10, 
+        shadowColor: 'rgba(15, 23, 42, 0.1)' 
+      },
+      label: {
+        show: true,
+        formatter: (params: any) => params.data[3],
+        position: 'top',
+        fontSize: 9,
+        fontWeight: 'bold',
+        color: '#64748b',
+        distance: 8
+      },
+      labelLayout: {
+        hideOverlap: true,
+        moveOverlap: 'shiftY'
+      },
+      emphasis: {
+        itemStyle: {
+          opacity: 1,
+          borderWidth: 2,
+          borderColor: '#fff',
+          shadowBlur: 20
+        },
+        label: {
+          show: true,
+          fontSize: 11,
+          color: '#0F172A'
+        }
+      },
+      markLine: {
+        silent: true,
+        symbol: 'none',
+        lineStyle: { type: 'dashed', color: '#10B981', opacity: 0.5, width: 1.5 },
+        data: [{
+          name: 'Benchmark CDT',
+          yAxis: bestCDTRate,
+          label: {
+            show: true,
+            position: 'end',
+            formatter: `BANCO: ${bestCDTRate.toFixed(1)}%`,
+            fontSize: 9,
+            fontWeight: 'bold',
+            color: '#10b981',
+            backgroundColor: '#fff',
+            padding: [2, 4],
+            borderRadius: 4
+          }
+        }]
+      }
     }]
   };
 

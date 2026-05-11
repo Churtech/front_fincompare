@@ -93,6 +93,15 @@ export interface HistoryPoint {
   close: number;
   volume: number;
   change_pct: number;
+  normalized_price?: number; // Base 100 desde el inicio de la serie
+  price_cop?: number;       // Valor del activo en pesos colombianos para esa fecha
+}
+
+export interface RiskReturnPoint {
+  ticker: string;
+  name: string;
+  volatility: number;
+  expected_return: number;
 }
 
 export interface PortfolioAllocation {
