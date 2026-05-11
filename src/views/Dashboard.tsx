@@ -178,9 +178,10 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
 
       <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4'>
         <StatCard
-          label={loadingCDT ? 'Sincronizando...' : (bestCDTEntity || 'CDT Destacado')}
+          label={loadingCDT ? 'Sincronizando...' : 'Mejor CDT'}
           value={loadingCDT ? '...' : (isValidNumber(bestCDTValue) ? bestCDTValue.toFixed(2) : '0.00')}
           suffix='%'
+          subtitle={bestCDTEntity}
           icon={Wallet}
           color='emerald'
           onClick={() => onViewChange?.('cdts')}
@@ -189,6 +190,8 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
           label='TRM Actual'
           value={loadingMetrics ? '...' : formatCurrency(currentTRM)}
           change={isValidNumber(trmChange) ? Number(trmChange.toFixed(2)) : undefined}
+          subtitle={metrics?.timestamp ? `Vigente: ${new Date(metrics.timestamp).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}` : undefined}
+          tooltip="La TRM mostrada fue certificada con las operaciones de hoy y rige legalmente para el día siguiente (T+1)."
           icon={DollarSign}
           color='primary'
         />
@@ -196,6 +199,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
           label='Mejor ETF'
           value={loadingAssets ? '...' : (assets.length > 0 && isValidNumber(assets[0]?.annual_return) ? assets[0]?.annual_return.toFixed(2) : '0.00')}
           suffix='%'
+          subtitle={assets.length > 0 ? assets[0]?.asset?.ticker : undefined}
           icon={TrendingUp}
           color='amber'
           onClick={() => onViewChange?.('assets')}
@@ -204,6 +208,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
           label='Inflación IPC'
           value={loadingMetrics ? '...' : (isValidNumber(inflation) ? inflation.toFixed(2) : '0.00')}
           suffix={(isValidNumber(inflation)) ? '%' : ''}
+          subtitle={metrics?.timestamp ? `Vigente: ${new Date(metrics.timestamp).toLocaleDateString('es-CO', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}` : undefined}
           icon={PieChart}
           color='rose'
           onClick={() => onViewChange?.('metrics')}

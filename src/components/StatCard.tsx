@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { LucideIcon, TrendingUp, TrendingDown } from 'lucide-react';
+import { LucideIcon, TrendingUp, TrendingDown, Info } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface StatCardProps {
@@ -9,6 +9,8 @@ interface StatCardProps {
   change?: number;
   icon: LucideIcon;
   suffix?: string;
+  subtitle?: string;
+  tooltip?: string;
   color?: 'emerald' | 'rose' | 'amber' | 'slate' | 'primary';
   onClick?: () => void;
 }
@@ -19,6 +21,8 @@ const StatCard: React.FC<StatCardProps> = ({
   change, 
   icon: Icon, 
   suffix = '', 
+  subtitle,
+  tooltip,
   color = 'slate',
   onClick
 }) => {
@@ -49,12 +53,19 @@ const StatCard: React.FC<StatCardProps> = ({
     >
       <div className="relative z-10">
         <div className="flex items-center justify-between mb-2">
-          <p className={cn(
-            "text-[9px] font-bold uppercase tracking-widest",
-            isPrimary ? "text-white/60" : "text-slate-400"
-          )}>
-            {label}
-          </p>
+          <div className="flex items-center gap-1.5">
+            <p className={cn(
+              "text-[9px] font-bold uppercase tracking-widest",
+              isPrimary ? "text-white/60" : "text-slate-400"
+            )}>
+              {label}
+            </p>
+            {tooltip && (
+              <div title={tooltip} className="cursor-help">
+                <Info size={12} className={isPrimary ? "text-white/50" : "text-slate-300"} />
+              </div>
+            )}
+          </div>
           <div className={cn(
             "p-1 rounded bg-slate-50 border border-slate-100",
             isPrimary && "bg-white/10 border-white/20 text-white"
@@ -78,16 +89,40 @@ const StatCard: React.FC<StatCardProps> = ({
           </span>
         </div>
 
-        {change !== undefined && (
-          <div className="mt-4 flex items-center gap-1.5 pt-3 border-t border-slate-50">
-            <div className={cn(
-              "flex items-center gap-1 text-[10px] font-bold font-mono",
-              isPrimary ? "text-white" : (isPositive ? 'text-emerald-600' : 'text-rose-600')
-            )}>
-              {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
-              {isPositive ? '+' : '-'}{Math.abs(change)}%
-            </div>
-            <span className="text-[8px] font-bold text-slate-300 uppercase tracking-tighter">var 7d</span>
+        {(subtitle || change !== undefined) && (
+          <div className={cn(
+            "mt-4 flex items-center gap-2 pt-3 border-t",
+            isPrimary ? "border-white/10" : "border-slate-50",
+            (subtitle && change !== undefined) ? "justify-between" : "justify-start"
+          )}>
+            {subtitle && (
+              <span className={cn(
+                "text-[9px] font-bold uppercase tracking-widest truncate",
+                isPrimary ? "text-white/80" : "text-slate-400"
+              )}>
+                {subtitle}
+              </span>
+            )}
+            
+            {change !== undefined && (
+              <div className={cn("flex items-center gap-1.5", subtitle && "shrink-0")}>
+                <div className={cn(
+                  "flex items-center gap-1 text-[10px] font-bold font-mono",
+                  isPrimary ? "text-white" : (isPositive ? 'text-emerald-600' : 'text-rose-600')
+                )}>
+                  {isPositive ? <TrendingUp size={10} /> : <TrendingDown size={10} />}
+                  {isPositive ? '+' : '-'}{Math.abs(change)}%
+                </div>
+                {!subtitle && (
+                  <span className={cn(
+                    "text-[8px] font-bold uppercase tracking-tighter",
+                    isPrimary ? "text-white/40" : "text-slate-300"
+                  )}>
+                    var 7d
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         )}
       </div>
