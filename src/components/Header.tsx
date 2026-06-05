@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Search, TrendingUp, TrendingDown, Clock, Settings } from 'lucide-react';
+import { Search, TrendingUp, TrendingDown, Clock } from 'lucide-react';
 import { useMarketMetrics, useAssets } from '../hooks/useFinance';
 import { formatCurrency } from '../lib/utils';
 import { AssetDetail } from '../types';
+import brandLogo from '@/assets/icon-fincompare.webp';
 
 const Header: React.FC = () => {
   const [time, setTime] = useState(new Date());
@@ -39,9 +40,7 @@ const Header: React.FC = () => {
     <header className='sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-100'>
       <div className='h-16 px-6 lg:px-10 flex items-center justify-between'>
         <div className='flex items-center gap-8'>
-          <h1 className='font-serif text-2xl text-primary tracking-tight font-bold'>
-            Fin<span className='italic font-medium text-emerald-700'>Compare</span>
-          </h1>
+          <img src={brandLogo} alt="FinCompare Logo" className="h-12 pl-12 lg:pl-0 object-contain" />
 
           <div className='relative group hidden md:block'>
             <Search className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors' size={16} />

@@ -242,6 +242,19 @@ export interface CorrelationMatrixResponse {
   matrix: number[][];
 }
 
+export interface ScenarioTrajectoryPoint {
+  month: number;
+  nominal_value: number;
+  real_value: number;
+}
+
+export interface Scenario {
+  name: string; // "Conservador", "Base", "Optimista"
+  return_rate: number;
+  real_return: number;
+  trajectory: ScenarioTrajectoryPoint[];
+}
+
 export interface TechnicalAnalysis {
   expected_return?: number;
   volatility?: number;
@@ -254,6 +267,7 @@ export interface TechnicalAnalysis {
   contributions?: AssetContributionDetail[];
   correlation_matrix?: CorrelationMatrixResponse;
   comparison_summary?: ComparisonSummaryDetail;
+  scenarios?: Scenario[];
 }
 
 export interface ComparisonSummaryDetail {

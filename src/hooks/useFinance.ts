@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import api from '../lib/api';
 import { 
   ApiResponse, 
@@ -41,6 +41,7 @@ export const useBestCDT = (params?: { investment?: number; days?: number }) => {
       const { data } = await api.get<ApiResponse<CDTDetail>>('/cdts/best', { params });
       return data;
     },
+    placeholderData: keepPreviousData,
   });
 };
 
@@ -247,7 +248,16 @@ export const usePortfolioAnalysis = (portfolioId: number, params?: { currency?: 
   });
 };
 
-export const useAssetAnalysis = (ticker: string, params?: { currency?: string; lookback_days?: number }) => {
+export const useAssetAnalysis = (
+  ticker: string, 
+  params?: { 
+    currency?: string; 
+    lookback_days?: number; 
+    initial_amount?: number; 
+    monthly_contribution?: number; 
+    projection_years?: number;
+  }
+) => {
   return useQuery({
     queryKey: ['assets', ticker, 'analysis', params],
     queryFn: async () => {
@@ -255,6 +265,7 @@ export const useAssetAnalysis = (ticker: string, params?: { currency?: string; l
       return data;
     },
     enabled: !!ticker,
+    placeholderData: keepPreviousData,
   });
 };
 

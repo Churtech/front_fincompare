@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       port: 3000,
       strictPort: true,
       host: '0.0.0.0',
-      allowedHosts: ['e769-186-183-244-102.ngrok-free.app'],
+      allowedHosts: ['5ac3-152-202-171-254.ngrok-free.app'],
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
         '/api': {

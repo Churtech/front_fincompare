@@ -2,6 +2,7 @@ import React from 'react';
 import { LayoutDashboard, Wallet, BarChart3, ArrowLeftRight, TrendingUp, PieChart, Menu, X, ShieldCheck, Briefcase, History } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
+import brandLogo from '@/assets/logo-fincompare.webp';
 
 interface SidebarProps {
   currentView: string;
@@ -17,6 +18,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
     { id: 'assets', label: 'Acciones & ETFs', icon: BarChart3 },
     { id: 'portfolios', label: 'Simulador Portafolios', icon: Briefcase },
     { id: 'retrospective', label: 'Simulador Retrospectivo', icon: History },
+    { id: 'scenarios', label: 'Simulador de Escenarios', icon: TrendingUp },
     { id: 'compare', label: 'Comparativa Real', icon: ArrowLeftRight },
     { id: 'correlations', label: 'Correlaciones', icon: PieChart },
     { id: 'metrics', label: 'Métricas de Mercado', icon: TrendingUp },
@@ -25,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   return (
     <>
       {/* Mobile Toggle Button */}
-      <button 
+      <button
         onClick={() => setIsOpen(!isOpen)}
         className="lg:hidden fixed top-4 left-4 z-[60] p-2 bg-primary text-white rounded-lg shadow-lg"
       >
@@ -55,13 +57,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
             className="fixed inset-y-0 left-0 z-50 w-72 bg-white border-r border-slate-100 flex flex-col shadow-xl lg:shadow-none"
           >
             <div className="p-8 flex-1 flex flex-col overflow-y-auto">
-              <div className="flex items-center gap-3 mb-12">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20">
-                  <div className="w-5 h-5 border-2 border-white rounded-sm rotate-45" />
-                </div>
-                <div>
-                  <h1 className="text-xl font-serif text-primary leading-none tracking-tight font-bold">FinCompare</h1>
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400 font-bold mt-1">Sistemas v1.2</p>
+
+              {/* Logo section */}
+              <div className="flex flex-col items-center gap-1 mb-8 w-full">
+                <div className="w-full flex items-center justify-center overflow-hidden" style={{ height: '150px' }}>
+                  <img
+                    src={brandLogo}
+                    alt="FinCompare Logo"
+                    style={{ width: '450px', maxWidth: 'none', height: 'auto', objectFit: 'contain' }}
+                  />
                 </div>
               </div>
 
@@ -79,15 +83,15 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                         }}
                         className={cn(
                           "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group relative text-left",
-                          isActive 
-                            ? 'bg-primary text-white shadow-lg shadow-primary/10' 
+                          isActive
+                            ? 'bg-primary text-white shadow-lg shadow-primary/10'
                             : 'text-slate-500 hover:bg-slate-50 hover:text-primary'
                         )}
                       >
                         <Icon size={18} className={cn(isActive ? "text-white" : "text-slate-400 group-hover:text-primary")} />
                         <span className="text-sm font-medium tracking-tight">{item.label}</span>
                         {isActive && (
-                          <motion.div 
+                          <motion.div
                             layoutId="active-pill"
                             className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
                           />
@@ -98,17 +102,18 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                 </nav>
 
                 <div className="pt-8 border-t border-slate-50">
-                   <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-4">Recursos</p>
-                   <div className="space-y-1">
-                     <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-primary transition-all text-left">
-                       <ShieldCheck size={18} className="text-slate-400" />
-                       <span className="text-sm font-medium">Seguridad de Datos</span>
-                     </button>
-                   </div>
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-4">Recursos</p>
+                  <div className="space-y-1">
+                    <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-primary transition-all text-left">
+                      <ShieldCheck size={18} className="text-slate-400" />
+                      <span className="text-sm font-medium">Seguridad de Datos</span>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
 
+            {/* Footer status */}
             <div className="p-6">
               <div className="bg-slate-50 rounded-2xl p-5 border border-slate-100">
                 <div className="flex items-center gap-3 mb-3">

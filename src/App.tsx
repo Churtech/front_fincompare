@@ -9,6 +9,7 @@ import CorrelationsView from './views/Correlations';
 import MetricsView from './views/Metrics';
 import PortfoliosView from './views/Portfolios';
 import RetrospectiveSimulator from './views/RetrospectiveSimulator';
+import ScenarioSimulator from './views/ScenarioSimulator';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -24,6 +25,7 @@ export default function App() {
       case 'metrics': return <MetricsView />;
       case 'portfolios': return <PortfoliosView />;
       case 'retrospective': return <RetrospectiveSimulator />;
+      case 'scenarios': return <ScenarioSimulator />;
       default: return <Dashboard onViewChange={setCurrentView} />;
     }
   };
