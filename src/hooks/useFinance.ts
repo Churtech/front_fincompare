@@ -20,7 +20,8 @@ import {
   RetrospectiveRequest,
   RetrospectiveResult,
   PortfolioComparison,
-  AssetHighlightsResponse
+  AssetHighlightsResponse,
+  DashboardSummaryResponse
 } from '../types';
 
 // --- CDTs ---
@@ -104,7 +105,7 @@ export const useAssetHistory = (ticker: string, days?: number) => {
 };
 
 // --- Portfolios ---
-export const usePortfolios = (params?: { user_id: number; limit?: number; offset?: number }) => {
+export const usePortfolios = (params?: { user_id: number; limit?: number; offset?: number }, enabled = true) => {
   return useQuery({
     queryKey: ['portfolios', params],
     queryFn: async () => {
@@ -124,6 +125,7 @@ export const usePortfolios = (params?: { user_id: number; limit?: number; offset
       }
       return data as { portfolios: Portfolio[]; total: number };
     },
+    enabled: enabled,
   });
 };
 
@@ -364,5 +366,16 @@ export const useComparison = (params: { investment: number; days: number; criter
       return data;
     },
     enabled: !!params.investment && !!params.days,
+  });
+};
+
+// --- Dashboard Summary BFF ---
+export const useDashboardSummary = () => {
+  return useQuery({
+    queryKey: ['dashboard', 'summary'],
+    queryFn: async () => {
+      const { data } = await api.get<DashboardSummaryResponse>('/dashboard/summary');
+      return data;
+    },
   });
 };

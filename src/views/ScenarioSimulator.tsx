@@ -238,7 +238,7 @@ const ScenarioSimulator: React.FC = () => {
   }, [cdtsResponse]);
 
   const bestCDTRate = useMemo(() => {
-    return bestCDTResponse?.data?.cdt?.tasa_ea || marketMetricsResponse?.data?.best_cdt_rate || 11.2;
+    return bestCDTResponse?.data?.cdt?.tasa_ea || marketMetricsResponse?.data?.best_cdt_rate || 0;
   }, [bestCDTResponse, marketMetricsResponse]);
 
   const cdtRate = useMemo(() => {
@@ -305,6 +305,10 @@ const ScenarioSimulator: React.FC = () => {
   // True on first load: neither query has returned data yet.
   // Show a skeleton so the banner never renders with assetFinalMedian=0.
   const isInitialLoad = loadingAnalysis || loadingCDT;
+
+  const hasCdtError = bestCDTRate === 0 && selectedInstitutionId !== 'custom' && !loadingCDT;
+  const hasAssetError = !!analysisError && viewMode !== 'cdt';
+  const showGeneralError = (hasCdtError && viewMode !== 'variable') || hasAssetError;
 
   // Inflation rate by currency
   const inflationRate = useMemo(() => {
@@ -1017,9 +1021,25 @@ const ScenarioSimulator: React.FC = () => {
 
         {/* --- Right Column: Output / Projections fan --- */}
         <div className="col-span-1 lg:col-span-2 space-y-6">
-          
-          {/* Winner Banner — skeleton on first load to avoid CDT flash while analysis is pending */}
-          {viewMode === 'compare' && (
+          {showGeneralError ? (
+            <div className="p-8 bg-rose-50/50 border border-rose-100 rounded-[32px] flex flex-col items-center justify-center text-center min-h-[400px] gap-4">
+              <AlertTriangle className="text-rose-500 shrink-0" size={48} />
+              <div>
+                <h4 className="text-lg font-serif font-bold text-rose-800">Error de Sincronización de Datos</h4>
+                <p className="text-xs text-rose-600 max-w-md leading-relaxed mt-2">
+                  {hasAssetError && hasCdtError 
+                    ? 'No se pudieron recuperar los datos históricos de renta variable ni las tasas de CDT de la API. Por favor, verifica tu conexión.'
+                    : hasAssetError 
+                      ? `No se pudieron cargar las proyecciones para ${ticker}. Asegúrate de que el backend esté corriendo y de que el activo tenga suficientes precios históricos.`
+                      : 'No se pudieron obtener las tasas de CDT de la API. Podés ingresar una tasa personalizada manualmente en la barra lateral para continuar.'
+                  }
+                </p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {/* Winner Banner — skeleton on first load to avoid CDT flash while analysis is pending */}
+              {viewMode === 'compare' && (
             isInitialLoad ? (
               <div className="p-6 rounded-[32px] border border-slate-100 bg-slate-50/50 shadow-sm animate-pulse flex flex-col md:flex-row justify-between items-start md:items-center gap-6 min-h-[96px]">
                 <div className="flex items-center gap-4 flex-1">
@@ -1074,120 +1094,159 @@ const ScenarioSimulator: React.FC = () => {
 
           {/* Metrics summary cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Variable Asset Card */}
-            {viewMode !== 'cdt' && (
-              <div className={cn(
-                "bg-white border border-slate-100 p-6 rounded-[28px] shadow-sm relative overflow-hidden flex flex-col justify-between",
-                viewMode === 'variable' ? "md:col-span-2 md:grid md:grid-cols-3 md:gap-6 md:items-center" : "space-y-4"
-              )}>
-                {/* Header */}
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0">
-                    <TrendingUp size={16} />
+            {isInitialLoad ? (
+              <>
+                {/* Renta Variable Card Skeleton */}
+                {viewMode !== 'cdt' && (
+                  <div className="bg-slate-50/50 border border-slate-100 p-6 rounded-[28px] shadow-sm animate-pulse min-h-[148px] flex flex-col justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-2 w-24 bg-slate-200 rounded-full" />
+                        <div className="h-1.5 w-16 bg-slate-200 rounded-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 mt-4">
+                      <div className="h-2 w-40 bg-slate-200 rounded-full" />
+                      <div className="h-6 w-32 bg-slate-200 rounded-full" />
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Renta Variable ({ticker})
-                    </span>
-                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mt-0.5 max-w-[200px] truncate" title={selectedAsset.name}>
-                      {selectedAsset.name}
-                    </span>
+                )}
+                {/* CDT Card Skeleton */}
+                {viewMode !== 'variable' && (
+                  <div className="bg-slate-50/50 border border-slate-100 p-6 rounded-[28px] shadow-sm animate-pulse min-h-[148px] flex flex-col justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-200 shrink-0" />
+                      <div className="space-y-1.5 flex-1">
+                        <div className="h-2 w-24 bg-slate-200 rounded-full" />
+                        <div className="h-1.5 w-16 bg-slate-200 rounded-full" />
+                      </div>
+                    </div>
+                    <div className="space-y-1.5 mt-4">
+                      <div className="h-2 w-40 bg-slate-200 rounded-full" />
+                      <div className="h-6 w-32 bg-slate-200 rounded-full" />
+                    </div>
                   </div>
-                </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Variable Asset Card */}
+                {viewMode !== 'cdt' && (
+                  <div className={cn(
+                    "bg-white border border-slate-100 p-6 rounded-[28px] shadow-sm relative overflow-hidden flex flex-col justify-between",
+                    viewMode === 'variable' ? "md:col-span-2 md:grid md:grid-cols-3 md:gap-6 md:items-center" : "space-y-4"
+                  )}>
+                    {/* Header */}
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-slate-900 flex items-center justify-center text-white shrink-0">
+                        <TrendingUp size={16} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          Renta Variable ({ticker})
+                        </span>
+                        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mt-0.5 max-w-[200px] truncate" title={selectedAsset.name}>
+                          {selectedAsset.name}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Main Value */}
-                <div className={cn(
-                  "space-y-1",
-                  viewMode === 'variable' && "md:border-l md:border-r md:border-slate-100 md:px-6"
-                )}>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Capital Final Estimado (Mediana P50)
-                  </span>
-                  <p className="text-3xl font-mono font-bold text-primary tracking-tighter">
-                    {formatVal(assetFinalMedian)}
-                  </p>
-                </div>
+                    {/* Main Value */}
+                    <div className={cn(
+                      "space-y-1",
+                      viewMode === 'variable' && "md:border-l md:border-r md:border-slate-100 md:px-6"
+                    )}>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Capital Final Estimado (Mediana P50)
+                      </span>
+                      <p className="text-3xl font-mono font-bold text-primary tracking-tighter">
+                        {formatVal(assetFinalMedian)}
+                      </p>
+                    </div>
 
-                {/* Secondary Values */}
-                <div className={cn(
-                  "grid grid-cols-2 gap-4 text-[10px] text-slate-500 uppercase font-bold",
-                  viewMode === 'variable' 
-                    ? "md:grid-cols-1 md:gap-3 md:pl-6" 
-                    : "pt-4 border-t border-slate-55"
-                )}>
-                  <div>
-                    <span className="text-slate-400 block text-[8px] tracking-wider">Escenario Optimista (P90)</span>
-                    <span className="text-blue-600 font-mono text-xs">
-                      {formatVal(chartData[chartData.length - 1]?.p90 || 0)}
-                    </span>
+                    {/* Secondary Values */}
+                    <div className={cn(
+                      "grid grid-cols-2 gap-4 text-[10px] text-slate-500 uppercase font-bold",
+                      viewMode === 'variable' 
+                        ? "md:grid-cols-1 md:gap-3 md:pl-6" 
+                        : "pt-4 border-t border-slate-55"
+                    )}>
+                      <div>
+                        <span className="text-slate-400 block text-[8px] tracking-wider">Escenario Optimista (P90)</span>
+                        <span className="text-blue-600 font-mono text-xs">
+                          {formatVal(chartData[chartData.length - 1]?.p90 || 0)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[8px] tracking-wider">Escenario Conservador (P10)</span>
+                        <span className="text-slate-600 font-mono text-xs">
+                          {formatVal(chartData[chartData.length - 1]?.p10 || 0)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[8px] tracking-wider">Escenario Conservador (P10)</span>
-                    <span className="text-slate-600 font-mono text-xs">
-                      {formatVal(chartData[chartData.length - 1]?.p10 || 0)}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
+                )}
 
-            {/* CDT Compound Card */}
-            {viewMode !== 'variable' && (
-              <div className={cn(
-                "bg-white border border-slate-100 p-6 rounded-[28px] shadow-sm relative overflow-hidden flex flex-col justify-between",
-                viewMode === 'cdt' ? "md:col-span-2 md:grid md:grid-cols-3 md:gap-6 md:items-center" : "space-y-4"
-              )}>
-                {/* Header */}
-                <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
-                    <Wallet size={16} />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
-                      Renta Fija Compuesta (CDT)
-                    </span>
-                    <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mt-0.5 max-w-[200px] truncate" title={selectedInstitutionId === 'best' ? 'Mejor CDT' : 'CDT'}>
-                      {selectedInstitutionId === 'best' && `Mejor CDT disponible (${bestCDTResponse?.data?.cdt?.institution?.name || 'Automático'}): ${cdtRate.toFixed(2)}% E.A.`}
-                      {selectedInstitutionId === 'custom' && `Tasa Personalizada: ${cdtRate.toFixed(2)}% E.A.`}
-                      {typeof selectedInstitutionId === 'number' && `${selectedCDT?.institution?.name || 'Banco Seleccionado'}: ${cdtRate.toFixed(2)}% E.A.`}
-                    </span>
-                  </div>
-                </div>
+                {/* CDT Compound Card */}
+                {viewMode !== 'variable' && (
+                  <div className={cn(
+                    "bg-white border border-slate-100 p-6 rounded-[28px] shadow-sm relative overflow-hidden flex flex-col justify-between",
+                    viewMode === 'cdt' ? "md:col-span-2 md:grid md:grid-cols-3 md:gap-6 md:items-center" : "space-y-4"
+                  )}>
+                    {/* Header */}
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500 shrink-0">
+                        <Wallet size={16} />
+                      </div>
+                      <div>
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+                          Renta Fija Compuesta (CDT)
+                        </span>
+                        <span className="text-[9px] text-slate-500 font-bold uppercase tracking-wider block mt-0.5 max-w-[200px] truncate" title={selectedInstitutionId === 'best' ? 'Mejor CDT' : 'CDT'}>
+                          {selectedInstitutionId === 'best' && `Mejor CDT disponible (${bestCDTResponse?.data?.cdt?.institution?.name || 'Automático'}): ${cdtRate.toFixed(2)}% E.A.`}
+                          {selectedInstitutionId === 'custom' && `Tasa Personalizada: ${cdtRate.toFixed(2)}% E.A.`}
+                          {typeof selectedInstitutionId === 'number' && `${selectedCDT?.institution?.name || 'Banco Seleccionado'}: ${cdtRate.toFixed(2)}% E.A.`}
+                        </span>
+                      </div>
+                    </div>
 
-                {/* Main Value */}
-                <div className={cn(
-                  "space-y-1",
-                  viewMode === 'cdt' && "md:border-l md:border-r md:border-slate-100 md:px-6"
-                )}>
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
-                    Capital Final Acumulado
-                  </span>
-                  <p className="text-3xl font-mono font-bold text-primary tracking-tighter">
-                    {formatVal(cdtFinalValue)}
-                  </p>
-                </div>
+                    {/* Main Value */}
+                    <div className={cn(
+                      "space-y-1",
+                      viewMode === 'cdt' && "md:border-l md:border-r md:border-slate-100 md:px-6"
+                    )}>
+                      <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">
+                        Capital Final Acumulado
+                      </span>
+                      <p className="text-3xl font-mono font-bold text-primary tracking-tighter">
+                        {formatVal(cdtFinalValue)}
+                      </p>
+                    </div>
 
-                {/* Secondary Values */}
-                <div className={cn(
-                  "grid grid-cols-2 gap-4 text-[10px] text-slate-500 uppercase font-bold",
-                  viewMode === 'cdt' 
-                    ? "md:grid-cols-1 md:gap-3 md:pl-6" 
-                    : "pt-4 border-t border-slate-50"
-                )}>
-                  <div>
-                    <span className="text-slate-400 block text-[8px] tracking-wider">Intereses Brutos</span>
-                    <span className="text-slate-600 font-mono text-xs">
-                      {formatVal(isReal ? deflateValue(cdtDetails.totalInterestGross, projectionYears * 12, inflationRate) : cdtDetails.totalInterestGross)}
-                    </span>
+                    {/* Secondary Values */}
+                    <div className={cn(
+                      "grid grid-cols-2 gap-4 text-[10px] text-slate-500 uppercase font-bold",
+                      viewMode === 'cdt' 
+                        ? "md:grid-cols-1 md:gap-3 md:pl-6" 
+                        : "pt-4 border-t border-slate-55"
+                    )}>
+                      <div>
+                        <span className="text-slate-400 block text-[8px] tracking-wider">Intereses Brutos</span>
+                        <span className="text-slate-600 font-mono text-xs">
+                          {formatVal(isReal ? deflateValue(cdtDetails.totalInterestGross, projectionYears * 12, inflationRate) : cdtDetails.totalInterestGross)}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="text-slate-400 block text-[8px] tracking-wider" title="Retención en la Fuente del 7% sobre rendimientos anuales">Retención Deducida</span>
+                        <span className="text-rose-500 font-mono text-xs">
+                          {formatVal(isReal ? deflateValue(cdtDetails.totalTaxesDeducted, projectionYears * 12, inflationRate) : cdtDetails.totalTaxesDeducted)}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <span className="text-slate-400 block text-[8px] tracking-wider" title="Retención en la Fuente del 7% sobre rendimientos anuales">Retención Deducida</span>
-                    <span className="text-rose-500 font-mono text-xs">
-                      {formatVal(isReal ? deflateValue(cdtDetails.totalTaxesDeducted, projectionYears * 12, inflationRate) : cdtDetails.totalTaxesDeducted)}
-                    </span>
-                  </div>
-                </div>
-              </div>
+                )}
+              </>
             )}
           </div>
 
@@ -1389,7 +1448,8 @@ const ScenarioSimulator: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
-
+          </>
+          )}
         </div>
       </div>
     </div>

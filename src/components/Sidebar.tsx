@@ -1,8 +1,10 @@
 import React from 'react';
-import { LayoutDashboard, Wallet, BarChart3, ArrowLeftRight, TrendingUp, PieChart, Menu, X, ShieldCheck, Briefcase, History } from 'lucide-react';
+import { LayoutDashboard, Wallet, BarChart3, ArrowLeftRight, TrendingUp, PieChart, Menu, X, ShieldCheck, Briefcase, History, LogOut } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
 import brandLogo from '@/assets/logo-fincompare.webp';
+import { useAuth } from '../context/AuthContext';
+
 
 interface SidebarProps {
   currentView: string;
@@ -11,6 +13,15 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
   const [isOpen, setIsOpen] = React.useState(typeof window !== 'undefined' ? window.innerWidth >= 1024 : true);
+  const { user, logout } = useAuth();
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (err) {
+      console.error('[Sidebar Logout Error]', err);
+    }
+  };
 
   const menuItems = [
     { id: 'dashboard', label: 'Panorama General', icon: LayoutDashboard },
@@ -101,14 +112,43 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                   })}
                 </nav>
 
-                <div className="pt-8 border-t border-slate-50">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-4">Recursos</p>
-                  <div className="space-y-1">
-                    <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-primary transition-all text-left">
-                      <ShieldCheck size={18} className="text-slate-400" />
-                      <span className="text-sm font-medium">Seguridad de Datos</span>
-                    </button>
+                <div className="pt-8 border-t border-slate-50 space-y-6">
+                  <div>
+                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 px-4">Recursos</p>
+                    <div className="space-y-1">
+                      <button className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-50 hover:text-primary transition-all text-left">
+                        <ShieldCheck size={18} className="text-slate-400" />
+                        <span className="text-sm font-medium">Seguridad de Datos</span>
+                      </button>
+                    </div>
                   </div>
+
+                  {user ? (
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-4">Terminal Activa</p>
+                      <div className="px-4 mb-3 text-xs font-semibold text-slate-600 truncate bg-slate-50 py-2 rounded-xl border border-slate-100/50">
+                        {user.email}
+                      </div>
+                      <button 
+                        onClick={handleLogout}
+                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-rose-500 hover:bg-rose-50/50 hover:text-rose-600 transition-all text-left group"
+                      >
+                        <LogOut size={18} className="text-rose-400 group-hover:text-rose-500" />
+                        <span className="text-sm font-medium">Cerrar Sesión</span>
+                      </button>
+                    </div>
+                  ) : (
+                    <div>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-4">Terminal Inactiva</p>
+                      <button 
+                        onClick={() => onViewChange('login')}
+                        className="w-full flex items-center gap-4 px-4 py-3 rounded-xl text-emerald-600 hover:bg-emerald-50/50 hover:text-emerald-700 transition-all text-left group"
+                      >
+                        <ShieldCheck size={18} className="text-emerald-500 group-hover:text-emerald-600" />
+                        <span className="text-sm font-medium">Iniciar Sesión</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

@@ -11,9 +11,20 @@ import PortfoliosView from './views/Portfolios';
 import RetrospectiveSimulator from './views/RetrospectiveSimulator';
 import ScenarioSimulator from './views/ScenarioSimulator';
 import { motion, AnimatePresence } from 'motion/react';
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { PrivateRoute } from './components/auth/PrivateRoute';
+import { LoginPage } from './components/auth/LoginPage';
 
-export default function App() {
+
+function AppContent() {
   const [currentView, setCurrentView] = React.useState('dashboard');
+  const { user } = useAuth();
+
+  React.useEffect(() => {
+    if (user && currentView === 'login') {
+      setCurrentView('dashboard');
+    }
+  }, [user, currentView]);
 
   const renderView = () => {
     switch (currentView) {
@@ -23,9 +34,10 @@ export default function App() {
       case 'cdts': return <CDTsView />;
       case 'correlations': return <CorrelationsView />;
       case 'metrics': return <MetricsView />;
-      case 'portfolios': return <PortfoliosView />;
+      case 'portfolios': return <PortfoliosView onViewChange={setCurrentView} />;
       case 'retrospective': return <RetrospectiveSimulator />;
       case 'scenarios': return <ScenarioSimulator />;
+      case 'login': return <LoginPage />;
       default: return <Dashboard onViewChange={setCurrentView} />;
     }
   };
@@ -69,5 +81,13 @@ export default function App() {
         </footer>
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }

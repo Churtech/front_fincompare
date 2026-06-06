@@ -79,6 +79,7 @@ export interface MarketMetrics {
   cdt_average_180d: number;
   cdt_average_360d: number;
   best_cdt_rate: number;
+  best_cdt_entity?: string;
   best_etf_performer: string;
   best_stock_performer: string;
   trm_current: number;
@@ -402,4 +403,19 @@ export interface AssetHighlightsResponse {
   growth: AssetHighlight[];
   efficiency: AssetHighlight[];
   stability: AssetHighlight[];
+}
+
+export interface AssetHistorySummary {
+  asset: Asset;
+  history: HistoryPoint[];
+  history_status: string;
+}
+
+export interface DashboardSummaryResponse {
+  portfolios: Portfolio[];
+  market_metrics: MarketMetrics;
+  asset_highlights: AssetHighlightsResponse;
+  asset_histories: AssetHistorySummary[];
+  history_status: string;
+  history_warning?: string;
 }

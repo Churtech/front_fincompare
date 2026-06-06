@@ -5,6 +5,7 @@ import { Briefcase, Plus, TrendingUp, Shield, Zap, Trash2, Play, X, Calendar, Al
 import { usePortfolios, useCreatePortfolio, useUpdatePortfolio, useDeletePortfolio, useAssets, useBacktest, usePortfolioDetail, useCDTs, usePortfolioAnalysis, useComparePortfolios } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
 import { Portfolio, PortfolioAllocation, BacktestResult, AssetDetail, AnalysisReport, CDTDetail, PortfolioComparison } from '../types';
+import { useAuth } from '../context/AuthContext';
 
 const BacktestModal: React.FC<{ portfolio: Portfolio; isOpen: boolean; onClose: () => void }> = ({ portfolio, isOpen, onClose }) => {
   const getTodayStr = () => {
@@ -957,7 +958,12 @@ const ComparisonPortfoliosModal: React.FC<{
   );
 };
 
-const PortfoliosView: React.FC = () => {
+interface PortfoliosViewProps {
+  onViewChange: (view: string) => void;
+}
+
+const PortfoliosView: React.FC<PortfoliosViewProps> = ({ onViewChange }) => {
+  const { user } = useAuth();
   const [isCreating, setIsCreating] = useState(false);
   const [selectedPortfolio, setSelectedPortfolio] = useState<Portfolio | null>(null);
   const [selectedPortfoliosForComparison, setSelectedPortfoliosForComparison] = useState<number[]>([]);
@@ -974,7 +980,7 @@ const PortfoliosView: React.FC = () => {
   const [isAssetDropdownOpen, setIsAssetDropdownOpen] = useState(false);
   const [editingPortfolioId, setEditingPortfolioId] = useState<number | null>(null);
 
-  const { data: portfoliosData, isLoading } = usePortfolios({ user_id: 1 });
+  const { data: portfoliosData, isLoading } = usePortfolios({ user_id: 1 }, !!user);
   const { data: etfsResponse } = useAssets({ type: 'etf' });
   const { data: stocksResponse } = useAssets({ type: 'stock' });
   const { data: cdtsResponse } = useCDTs();
@@ -1200,6 +1206,10 @@ const PortfoliosView: React.FC = () => {
         </div>
         <button 
           onClick={() => {
+            if (!user) {
+              onViewChange('login');
+              return;
+            }
             if (isCreating) {
               setIsCreating(false);
               setEditingPortfolioId(null);
@@ -1390,7 +1400,15 @@ const PortfoliosView: React.FC = () => {
           <div className='p-12 text-center bg-slate-50 rounded-3xl border border-slate-100 border-dashed shadow-inner'>
             <Briefcase size={48} className='mx-auto text-slate-300 mb-4' />
             <h3 className='text-lg font-bold text-primary mb-2'>No tienes portafolios creados</h3>
-            <p className='text-slate-500 text-sm max-w-sm mx-auto'>Crea tu primer portafolio seleccionando distintos activos y analizando su rendimiento histórico y proyecciones de riesgo.</p>
+            <p className='text-slate-500 text-sm max-w-sm mx-auto mb-6'>Crea tu primer portafolio seleccionando distintos activos y analizando su rendimiento histórico y proyecciones de riesgo.</p>
+            {!user && (
+              <button 
+                onClick={() => onViewChange('login')}
+                className='px-6 py-3 bg-primary text-white rounded-xl text-xs font-bold uppercase tracking-wider hover:bg-zinc-800 transition-all shadow-md'
+              >
+                Iniciar Sesión para Crear
+              </button>
+            )}
           </div>
         ) : (
           portfolios.map((portfolio) => (

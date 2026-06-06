@@ -1,0 +1,114 @@
+import React, { createContext, useContext, useEffect, useState } from 'react';
+import { createClient, User } from '@supabase/supabase-js';
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+let currentAccessToken: string | null = null;
+
+export const getAccessToken = () => currentAccessToken;
+
+export const refreshSessionToken = async (): Promise<string | null> => {
+  try {
+    const { data, error } = await supabase.auth.getSession();
+    if (error) throw error;
+    if (data.session) {
+      currentAccessToken = data.session.access_token;
+      return data.session.access_token;
+    }
+    
+    // Fallback refresh
+    const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
+    if (refreshError) throw refreshError;
+    if (refreshData.session) {
+      currentAccessToken = refreshData.session.access_token;
+      return refreshData.session.access_token;
+    }
+  } catch (err) {
+    console.error('[Auth] Failed to refresh session token:', err);
+  }
+  currentAccessToken = null;
+  return null;
+};
+
+interface AuthContextType {
+  user: User | null;
+  token: string | null;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  signUp: (email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+}
+
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [token, setToken] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setUser(session.user);
+        setToken(session.access_token);
+        currentAccessToken = session.access_token;
+      }
+      setLoading(false);
+    }).catch((err) => {
+      console.error('[Auth] Initial session retrieval failed:', err);
+      setLoading(false);
+    });
+
+    // Listen to auth state changes (sign in, sign out, token refresh, etc.)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log(`[Auth] Event: ${event}`);
+      if (session) {
+        setUser(session.user);
+        setToken(session.access_token);
+        currentAccessToken = session.access_token;
+      } else {
+        setUser(null);
+        setToken(null);
+        currentAccessToken = null;
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+  };
+
+  const signUp = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({ email, password });
+    if (error) throw error;
+  };
+
+  const logout = async () => {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
+  };
+
+  return (
+    <AuthContext.Provider value={{ user, token, loading, login, signUp, logout }}>
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};

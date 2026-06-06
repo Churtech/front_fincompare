@@ -14,7 +14,7 @@ import {
   ChevronUp 
 } from 'lucide-react';
 import StatCard from '../components/StatCard';
-import { useBestCDT, useMarketMetrics, useAssets, useTRMMetrics, useAssetHistory, useAssetHighlights, useAssetDetail } from '../hooks/useFinance';
+import { useDashboardSummary, useAssets, useAssetDetail } from '../hooks/useFinance';
 import { formatCurrency, isValidNumber, cn } from '../lib/utils';
 import { AssetDetail, HistoryPoint } from '../types';
 
@@ -23,35 +23,69 @@ interface DashboardProps {
 }
 
 const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
-  const { data: bestCDTResponse, isLoading: loadingCDT } = useBestCDT();
-  const { data: metricsResponse, isLoading: loadingMetrics } = useMarketMetrics();
+  const { data: summaryResponse, isLoading: loadingSummary } = useDashboardSummary();
   const { data: assetsResponse, isLoading: loadingAssets } = useAssets({ type: 'etf' });
-  const { data: trmMetricsResponse } = useTRMMetrics(7);
-  const { data: etfHighlights, isLoading: loadingEtfHighlights } = useAssetHighlights('etf');
-  const { data: stockHighlights, isLoading: loadingStockHighlights } = useAssetHighlights('stock');
   const { data: spyDetailResponse, isLoading: loadingSpy } = useAssetDetail('SPY');
 
   const spyDetail = spyDetailResponse?.data;
+  const assets = assetsResponse?.data || [];
 
   const [activeHighlightTab, setActiveHighlightTab] = useState<'etf' | 'stock'>('etf');
   const [expandedGrowthIdx, setExpandedGrowthIdx] = useState<number | null>(0);
   const [expandedEfficiencyIdx, setExpandedEfficiencyIdx] = useState<number | null>(0);
   const [expandedStabilityIdx, setExpandedStabilityIdx] = useState<number | null>(0);
 
-  const loadingHighlights = loadingEtfHighlights || loadingStockHighlights;
+  const loadingCDT = loadingSummary;
+  const loadingMetrics = loadingSummary;
+  const loadingHighlights = loadingSummary;
+  const loadingHistory = loadingSummary;
+
+  const metrics = summaryResponse?.market_metrics;
+  const highlights = summaryResponse?.asset_highlights;
+  const assetHistories = summaryResponse?.asset_histories || [];
+
+  const etfHighlights = useMemo(() => {
+    if (!highlights) return null;
+    return {
+      growth: highlights.growth.filter(h => h.asset?.asset?.type === 'etf'),
+      efficiency: highlights.efficiency.filter(h => h.asset?.asset?.type === 'etf'),
+      stability: highlights.stability.filter(h => h.asset?.asset?.type === 'etf'),
+    };
+  }, [highlights]);
+
+  const stockHighlights = useMemo(() => {
+    if (!highlights) return null;
+    return {
+      growth: highlights.growth.filter(h => h.asset?.asset?.type === 'stock'),
+      efficiency: highlights.efficiency.filter(h => h.asset?.asset?.type === 'stock'),
+      stability: highlights.stability.filter(h => h.asset?.asset?.type === 'stock'),
+    };
+  }, [highlights]);
+
   const currentHighlights = activeHighlightTab === 'etf' ? etfHighlights : stockHighlights;
 
-  const metrics = metricsResponse?.data;
-  const bestCDT = bestCDTResponse?.data;
-  const assets = assetsResponse?.data || [];
-  const trmMetrics = trmMetricsResponse?.data;
+  // Best CDT metrics extracted from consolidated MarketMetrics
+  const bestCDTValue = metrics?.best_cdt_rate;
+  const bestCDTEntity = metrics?.best_cdt_entity;
+  const trmMetrics = undefined; // TRM metrics already present in metrics via trm_current/trm_change_7d
 
   // Obtener histórico real del mejor ETF para la trayectoria
   const topAssetTicker = assets.length > 0 ? assets[0]?.asset?.ticker : '';
-  const { data: historyResponse, isLoading: loadingHistory } = useAssetHistory(topAssetTicker, 30);
-  const history = historyResponse?.data || [];
+  const history = useMemo(() => {
+    if (!topAssetTicker) return [];
+    const found = assetHistories.find(h => h.asset?.ticker === topAssetTicker);
+    if (found) {
+      if (found.history.length > 30) {
+        return found.history.slice(-30);
+      }
+      return found.history;
+    }
+    // Fallback: find any etf history with 30 points
+    const fallback = assetHistories.find(h => h.asset?.type === 'etf');
+    return fallback ? fallback.history : [];
+  }, [topAssetTicker, assetHistories]);
 
-  // ── Historiales de los 3 activos de cada categoría (ETF y Stock) ───────────
+  // Tickers for each category to lookup in consolidated histories
   const eg0t = etfHighlights?.growth?.[0]?.asset?.asset?.ticker || '';
   const eg1t = etfHighlights?.growth?.[1]?.asset?.asset?.ticker || '';
   const eg2t = etfHighlights?.growth?.[2]?.asset?.asset?.ticker || '';
@@ -61,6 +95,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
   const es0t = etfHighlights?.stability?.[0]?.asset?.asset?.ticker || '';
   const es1t = etfHighlights?.stability?.[1]?.asset?.asset?.ticker || '';
   const es2t = etfHighlights?.stability?.[2]?.asset?.asset?.ticker || '';
+
   const sg0t = stockHighlights?.growth?.[0]?.asset?.asset?.ticker || '';
   const sg1t = stockHighlights?.growth?.[1]?.asset?.asset?.ticker || '';
   const sg2t = stockHighlights?.growth?.[2]?.asset?.asset?.ticker || '';
@@ -71,35 +106,29 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
   const ss1t = stockHighlights?.stability?.[1]?.asset?.asset?.ticker || '';
   const ss2t = stockHighlights?.stability?.[2]?.asset?.asset?.ticker || '';
 
-  const { data: hEg0 } = useAssetHistory(eg0t, 90);
-  const { data: hEg1 } = useAssetHistory(eg1t, 90);
-  const { data: hEg2 } = useAssetHistory(eg2t, 90);
-  const { data: hEe0 } = useAssetHistory(ee0t, 90);
-  const { data: hEe1 } = useAssetHistory(ee1t, 90);
-  const { data: hEe2 } = useAssetHistory(ee2t, 90);
-  const { data: hEs0 } = useAssetHistory(es0t, 90);
-  const { data: hEs1 } = useAssetHistory(es1t, 90);
-  const { data: hEs2 } = useAssetHistory(es2t, 90);
-  const { data: hSg0 } = useAssetHistory(sg0t, 90);
-  const { data: hSg1 } = useAssetHistory(sg1t, 90);
-  const { data: hSg2 } = useAssetHistory(sg2t, 90);
-  const { data: hSe0 } = useAssetHistory(se0t, 90);
-  const { data: hSe1 } = useAssetHistory(se1t, 90);
-  const { data: hSe2 } = useAssetHistory(se2t, 90);
-  const { data: hSs0 } = useAssetHistory(ss0t, 90);
-  const { data: hSs1 } = useAssetHistory(ss1t, 90);
-  const { data: hSs2 } = useAssetHistory(ss2t, 90);
+  const getHistoryForTicker = (ticker: string) => {
+    if (!ticker) return [];
+    const found = assetHistories.find(h => h.asset?.ticker === ticker);
+    return found ? found.history : [];
+  };
 
-  // Historiales activos según la pestaña seleccionada
-  const activeGrowthHistories = activeHighlightTab === 'etf'
-    ? [hEg0?.data || [], hEg1?.data || [], hEg2?.data || []]
-    : [hSg0?.data || [], hSg1?.data || [], hSg2?.data || []];
-  const activeEfficiencyHistories = activeHighlightTab === 'etf'
-    ? [hEe0?.data || [], hEe1?.data || [], hEe2?.data || []]
-    : [hSe0?.data || [], hSe1?.data || [], hSe2?.data || []];
-  const activeStabilityHistories = activeHighlightTab === 'etf'
-    ? [hEs0?.data || [], hEs1?.data || [], hEs2?.data || []]
-    : [hSs0?.data || [], hSs1?.data || [], hSs2?.data || []];
+  const activeGrowthHistories = useMemo(() => {
+    return activeHighlightTab === 'etf'
+      ? [getHistoryForTicker(eg0t), getHistoryForTicker(eg1t), getHistoryForTicker(eg2t)]
+      : [getHistoryForTicker(sg0t), getHistoryForTicker(sg1t), getHistoryForTicker(sg2t)];
+  }, [activeHighlightTab, eg0t, eg1t, eg2t, sg0t, sg1t, sg2t, assetHistories]);
+
+  const activeEfficiencyHistories = useMemo(() => {
+    return activeHighlightTab === 'etf'
+      ? [getHistoryForTicker(ee0t), getHistoryForTicker(ee1t), getHistoryForTicker(ee2t)]
+      : [getHistoryForTicker(se0t), getHistoryForTicker(se1t), getHistoryForTicker(se2t)];
+  }, [activeHighlightTab, ee0t, ee1t, ee2t, se0t, se1t, se2t, assetHistories]);
+
+  const activeStabilityHistories = useMemo(() => {
+    return activeHighlightTab === 'etf'
+      ? [getHistoryForTicker(es0t), getHistoryForTicker(es1t), getHistoryForTicker(es2t)]
+      : [getHistoryForTicker(ss0t), getHistoryForTicker(ss1t), getHistoryForTicker(ss2t)];
+  }, [activeHighlightTab, es0t, es1t, es2t, ss0t, ss1t, ss2t, assetHistories]);
 
   // Construye la opción ECharts para la mini-gráfica de 3 líneas dentro de cada card
   const buildCardChartOption = (
@@ -193,9 +222,6 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
   const currentTRM = trmMetrics?.current || metrics?.trm_current;
   const trmChange = trmMetrics?.change_7d || metrics?.trm_change_7d;
   const inflation = metrics?.inflation_rate;
-
-  const bestCDTValue = bestCDT?.cdt?.tasa_ea;
-  const bestCDTEntity = bestCDT?.cdt?.institution?.name;
 
   const trmHigh = trmMetrics?.high_52w;
   const trmLow = trmMetrics?.low_52w;

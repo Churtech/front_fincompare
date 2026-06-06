@@ -30,3 +30,8 @@ pnpm-debug.log*
 # AI / Custom
 GEMINI.md
 metadata.json
+
+# Scratch and Specs
+openspec/
+scratch/
+.atl/
