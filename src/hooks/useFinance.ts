@@ -105,7 +105,7 @@ export const useAssetHistory = (ticker: string, days?: number) => {
 };
 
 // --- Portfolios ---
-export const usePortfolios = (params?: { user_id: number; limit?: number; offset?: number }, enabled = true) => {
+export const usePortfolios = (params?: { limit?: number; offset?: number }, enabled = true) => {
   return useQuery({
     queryKey: ['portfolios', params],
     queryFn: async () => {
@@ -143,7 +143,7 @@ export const usePortfolioDetail = (portfolioId: number) => {
 export const useCreatePortfolio = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { name: string; description?: string; total_investment_cop: number; user_id: number; allocations: PortfolioAllocation[] }) => {
+    mutationFn: async (payload: { name: string; description?: string; total_investment_cop: number; allocations: PortfolioAllocation[] }) => {
       const { data } = await api.post<ApiResponse<{ portfolio_id: number }>>('/portfolios', payload);
       return data;
     },
@@ -156,7 +156,7 @@ export const useCreatePortfolio = () => {
 export const useUpdatePortfolio = (portfolioId: number) => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (payload: { name: string; description?: string; total_investment_cop: number; user_id: number; allocations: PortfolioAllocation[] }) => {
+    mutationFn: async (payload: { name: string; description?: string; total_investment_cop: number; allocations: PortfolioAllocation[] }) => {
       const { data } = await api.put<{ message: string }>(`/portfolios/${portfolioId}`, payload);
       return data;
     },

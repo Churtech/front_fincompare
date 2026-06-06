@@ -980,7 +980,7 @@ const PortfoliosView: React.FC<PortfoliosViewProps> = ({ onViewChange }) => {
   const [isAssetDropdownOpen, setIsAssetDropdownOpen] = useState(false);
   const [editingPortfolioId, setEditingPortfolioId] = useState<number | null>(null);
 
-  const { data: portfoliosData, isLoading } = usePortfolios({ user_id: 1 }, !!user);
+  const { data: portfoliosData, isLoading } = usePortfolios(undefined, !!user);
   const { data: etfsResponse } = useAssets({ type: 'etf' });
   const { data: stocksResponse } = useAssets({ type: 'stock' });
   const { data: cdtsResponse } = useCDTs();
@@ -1026,14 +1026,12 @@ const PortfoliosView: React.FC<PortfoliosViewProps> = ({ onViewChange }) => {
     if (editingPortfolioId) {
       await updatePortfolio.mutateAsync({
         ...newPortfolio,
-        allocations: mappedAllocations,
-        user_id: 1
+        allocations: mappedAllocations
       });
     } else {
       await createPortfolio.mutateAsync({ 
         ...newPortfolio, 
-        allocations: mappedAllocations,
-        user_id: 1 
+        allocations: mappedAllocations
       });
     }
     setIsCreating(false);

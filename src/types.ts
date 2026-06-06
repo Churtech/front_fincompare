@@ -127,7 +127,7 @@ export interface Portfolio {
   name: string;
   description?: string;
   total_investment_cop: number;
-  user_id: number;
+  user_id: string;
   created_at: string;
   updated_at?: string;
   allocations?: PortfolioAllocation[];
