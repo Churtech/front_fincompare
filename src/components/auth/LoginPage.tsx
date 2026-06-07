@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { Mail, Lock, Eye, EyeOff, Loader2, ShieldAlert, CheckCircle2, MailCheck } from 'lucide-react';
 import { motion } from 'motion/react';
-import brandLogo from '@/assets/logo-fincompare.webp';
+import brandLogo from '@/assets/logo-cifra.webp';
 
 export const LoginPage: React.FC = () => {
   const { login, signUp } = useAuth();
@@ -133,7 +133,7 @@ export const LoginPage: React.FC = () => {
           <div className="h-20 flex items-center justify-center overflow-hidden mb-2">
             <img
               src={brandLogo}
-              alt="FinCompare Logo"
+              alt="Cifra Logo"
               className="h-16 w-auto object-contain"
             />
           </div>
@@ -141,7 +141,7 @@ export const LoginPage: React.FC = () => {
             Terminal de Inteligencia Financiera
           </p>
           <h2 className="text-xl font-bold text-slate-800 tracking-tight">
-            Bienvenido a FinCompare
+            Bienvenido a Cifra
           </h2>
         </div>
 
@@ -222,7 +222,7 @@ export const LoginPage: React.FC = () => {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="ejemplo@fincompare.co"
+                placeholder="ejemplo@cifra.co"
                 className="w-full pl-10 pr-4 py-2.5 bg-slate-50/50 border border-slate-200/80 rounded-xl text-sm outline-none transition-all placeholder:text-slate-400 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/5 font-medium text-slate-800"
               />
             </div>

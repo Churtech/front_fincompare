@@ -66,7 +66,7 @@ function AppContent() {
 
         <footer className="px-8 lg:px-12 py-12 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-8 bg-white/50">
           <div className="flex flex-col items-center md:items-start gap-2">
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 FinCompare Intelligence Terminal</p>
+            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">© 2026 Cifra Intelligence Terminal</p>
             <p className="text-[9px] text-slate-300 uppercase tracking-widest font-medium italic">Grado Institucional • Conectividad de Baja Latencia</p>
           </div>
           

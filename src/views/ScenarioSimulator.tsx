@@ -1441,7 +1441,7 @@ const ScenarioSimulator: React.FC = () => {
 
                   <div className="pt-4 border-t border-slate-200">
                     <p className="text-[9px] text-slate-400 leading-relaxed italic bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                      * Descargo de responsabilidad: FinCompare es una plataforma strictly educativa. Esta simulación no constituye consejo, asesoría ni sugerencia formal de inversión.
+                      * Descargo de responsabilidad: Cifra es una plataforma estrictamente educativa. Esta simulación no constituye consejo, asesoría ni sugerencia formal de inversión.
                     </p>
                   </div>
                 </div>

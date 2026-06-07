@@ -86,7 +86,7 @@ const CDTsView: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `fincompare_cdts_${new Date().toISOString().split('T')[0]}.csv`);
+    link.setAttribute('download', `cifra_cdts_${new Date().toISOString().split('T')[0]}.csv`);
     link.style.visibility = 'hidden';
     document.body.appendChild(link);
     link.click();

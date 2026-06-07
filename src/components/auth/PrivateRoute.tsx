@@ -1,7 +1,7 @@
 import React from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { LoginPage } from './LoginPage';
-import brandLogo from '@/assets/icon-fincompare.webp';
+import brandLogo from '@/assets/icon-cifra.webp';
 
 interface PrivateRouteProps {
   children: React.ReactNode;
@@ -19,7 +19,7 @@ export const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
             <div className="w-16 h-16 rounded-full border-4 border-slate-100 border-t-emerald-600 animate-spin" />
             <img 
               src={brandLogo} 
-              alt="FinCompare Loading" 
+              alt="Cifra Loading" 
               className="absolute w-8 h-8 object-contain" 
             />
           </div>

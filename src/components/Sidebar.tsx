@@ -74,7 +74,7 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
                 <div className="w-full flex items-center justify-center overflow-hidden" style={{ height: '150px' }}>
                   <img
                     src={brandLogo}
-                    alt="FinCompare Logo"
+                    alt="Cifra Logo"
                     style={{ width: '450px', maxWidth: 'none', height: 'auto', objectFit: 'contain' }}
                   />
                 </div>

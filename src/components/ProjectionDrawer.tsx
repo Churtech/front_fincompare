@@ -58,7 +58,7 @@ const ProjectionDrawer: React.FC<ProjectionDrawerProps> = ({ comparisonItem, isO
   const isRealReturnValid = realReturn > -100 && realReturn < 100;
 
   const handleCopySummary = () => {
-    const text = `Análisis FinCompare:\nActivo: ${entityName} ${ticker ? `(${ticker})` : ''}\nInversión: ${formatCurrency(initialInvestment)}\nRetorno Neto: ${netReturn}%\nGanancia Proyectada: ${formatCurrency(gainNet)}`;
+    const text = `Análisis Cifra:\nActivo: ${entityName} ${ticker ? `(${ticker})` : ''}\nInversión: ${formatCurrency(initialInvestment)}\nRetorno Neto: ${netReturn}%\nGanancia Proyectada: ${formatCurrency(gainNet)}`;
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -251,7 +251,7 @@ const ProjectionDrawer: React.FC<ProjectionDrawerProps> = ({ comparisonItem, isO
               </button>
               
               <p className="text-[9px] text-center text-slate-400 uppercase font-bold tracking-widest pt-2">
-                FinCompare · Terminal de Inteligencia Institucional
+                Cifra · Terminal de Inteligencia Institucional
               </p>
             </div>
           </motion.div>
