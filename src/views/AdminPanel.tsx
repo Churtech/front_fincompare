@@ -31,7 +31,12 @@ const AdminPanel: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 10;
 
-  const isAdmin = user?.email === 'juanesteban.paezalbarracin@gmail.com';
+  const isAdmin = useMemo(() => {
+    if (!user?.email) return false;
+    const adminEmailsStr = import.meta.env.VITE_ADMIN_EMAILS || '';
+    const adminEmails = adminEmailsStr.split(',').map((email: string) => email.trim().toLowerCase());
+    return adminEmails.includes(user.email.toLowerCase());
+  }, [user]);
 
   const showToast = (message: string, type: 'success' | 'error' = 'success') => {
     setToast({ message, type });

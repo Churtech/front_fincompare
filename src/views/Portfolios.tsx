@@ -1,15 +1,16 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Briefcase, Plus, Shield, Zap, Trash2, X, AlertTriangle, Scale, Award, Pencil } from 'lucide-react';
-import { usePortfolios, useCreatePortfolio, useUpdatePortfolio, useDeletePortfolio, useAssets, usePortfolioDetail, useCDTs, usePortfolioAnalysis, useComparePortfolios } from '../hooks/useFinance';
+import { usePortfolios, useCreatePortfolio, useUpdatePortfolio, useDeletePortfolio, useAssets, usePortfolioDetail, useCDTs, usePortfolioAnalysis, useCompareAnalysis } from '../hooks/useFinance';
 import { formatCurrency, cn } from '../lib/utils';
-import { Portfolio, PortfolioAllocation, AssetDetail, CDTDetail, PortfolioComparison } from '../types';
+import { Portfolio, PortfolioAllocation, AssetDetail, CDTDetail, AnalysisReport } from '../types';
 import { useAuth } from '../context/AuthContext';
 
 import { PortfolioCharts as BacktestModal } from '../components/portfolios/PortfolioCharts';
 import { PortfolioSummary } from '../components/portfolios/PortfolioSummary';
 import { PortfolioAssetTable } from '../components/portfolios/PortfolioAssetTable';
 import { PortfolioRebalancing } from '../components/portfolios/PortfolioRebalancing';
+import { ComparisonPortfoliosModal } from '../components/portfolios/ComparisonPortfoliosModal';
 
 const PortfolioCard: React.FC<{ 
   initialPortfolio: Portfolio; 
@@ -110,184 +111,7 @@ const PortfolioCard: React.FC<{
   );
 };
 
-const ComparisonPortfoliosModal: React.FC<{
-  portfolioIds: number[];
-  isOpen: boolean;
-  onClose: () => void;
-  allPortfolios: Portfolio[];
-  assets?: AssetDetail[];
-  cdts?: CDTDetail[];
-}> = ({ portfolioIds, isOpen, onClose, allPortfolios, assets = [], cdts = [] }) => {
-  const comparePortfolios = useComparePortfolios();
-  const [comparisonData, setComparisonData] = useState<PortfolioComparison | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  React.useEffect(() => {
-    if (isOpen && portfolioIds.length >= 2) {
-      setError(null);
-      setComparisonData(null);
-      comparePortfolios.mutate(portfolioIds, {
-        onSuccess: (res) => {
-          setComparisonData(res.data);
-        },
-        onError: (err: any) => {
-          setError(err.response?.data?.error || err.message || 'Error comparando portafolios.');
-        }
-      });
-    }
-  }, [isOpen, portfolioIds]);
-
-  if (!isOpen) return null;
-
-  return (
-    <AnimatePresence>
-      <div className='fixed inset-0 z-[120] flex items-center justify-center p-4'>
-        <motion.div
-          initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-          onClick={onClose} className='absolute inset-0 bg-slate-900/60 backdrop-blur-sm'
-        />
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }}
-          className='relative w-full max-w-[1000px] max-h-[85vh] bg-white rounded-[40px] shadow-2xl overflow-hidden flex flex-col border border-white/20 p-8 z-10'
-        >
-          <div className='flex justify-between items-center mb-6 pb-4 border-b border-slate-100'>
-            <div>
-              <h3 className='text-2xl font-serif font-bold text-slate-900 tracking-tight'>Comparativa Cruzada de Portafolios</h3>
-              <p className='text-xs text-slate-400 mt-1 uppercase tracking-wider font-bold flex items-center gap-2'>
-                <span className='w-4 h-[1px] bg-slate-200'></span>
-                Análisis de Eficiencia en Lote (Markowitz & Sharpe)
-              </p>
-            </div>
-            <button onClick={onClose} className='p-3 hover:bg-slate-50 rounded-full transition-all text-slate-400 hover:text-slate-900'><X size={20} /></button>
-          </div>
-
-          <div className='overflow-y-auto custom-scrollbar flex-1 pr-1'>
-            {comparePortfolios.isPending ? (
-              <div className='py-20 text-center flex flex-col items-center gap-4'>
-                <motion.div animate={{ rotate: 360 }} transition={{ repeat: Infinity, duration: 1, ease: 'linear' }} className='w-10 h-10 border-4 border-slate-100 border-t-primary rounded-full' />
-                <p className='text-xs font-bold text-slate-400 uppercase tracking-widest'>Ejecutando cálculos de optimización cruzada...</p>
-              </div>
-            ) : error ? (
-              <div className='p-6 bg-rose-50 border border-rose-100 rounded-2xl flex items-start gap-3 my-10'>
-                <AlertTriangle size={18} className='text-rose-500 mt-0.5 shrink-0' />
-                <p className='text-xs text-rose-600 font-medium'>{error}</p>
-              </div>
-            ) : comparisonData ? (
-              <div className='overflow-x-auto custom-scrollbar pb-4'>
-                <table className='w-full border-collapse'>
-                  <thead>
-                    <tr className='border-b border-slate-100 bg-slate-50/50'>
-                      <th className='p-4 text-left text-[10px] font-bold text-slate-400 uppercase tracking-wider'>Métrica / Portafolio</th>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        return (
-                          <th key={id} className='p-4 text-right text-xs font-bold text-primary font-serif'>{p.name}</th>
-                        );
-                      })}
-                    </tr>
-                  </thead>
-                  <tbody className='divide-y divide-slate-100'>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Retorno Esperado E.A.</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        const isBest = String(id) === String(comparisonData.best_return);
-                        return (
-                          <td key={id} className='p-4 text-right font-mono text-sm font-bold'>
-                            <span className={cn('inline-flex items-center gap-1.5', isBest && 'text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg')}>
-                              {isBest && <Award size={12} />}
-                              {(p.metrics?.expected_return || 0).toFixed(2)}%
-                            </span>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Volatilidad Anual</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        return (
-                          <td key={id} className='p-4 text-right font-mono text-sm font-bold text-slate-700'>
-                            {(p.metrics?.volatility || 0).toFixed(2)}%
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Sharpe Ratio</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        const isBest = String(id) === String(comparisonData.best_sharpe);
-                        return (
-                          <td key={id} className='p-4 text-right font-mono text-sm font-bold'>
-                            <span className={cn('inline-flex items-center gap-1.5', isBest && 'text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg')}>
-                              {isBest && <Zap size={12} fill='currentColor' />}
-                              {(p.metrics?.sharpe_ratio || 0).toFixed(2)}
-                            </span>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Máximo Drawdown</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        return (
-                          <td key={id} className='p-4 text-right font-mono text-sm font-bold text-rose-500'>
-                            {(p.metrics?.maximum_drawdown || 0).toFixed(2)}%
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Score de Diversificación</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        const isBest = String(id) === String(comparisonData.best_diversification);
-                        return (
-                          <td key={id} className='p-4 text-right font-mono text-sm font-bold'>
-                            <span className={cn('inline-flex items-center gap-1.5', isBest && 'text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-lg')}>
-                              {isBest && <Shield size={12} />}
-                              {(p.metrics?.diversification_score || 0)}/100
-                            </span>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                    <tr>
-                      <td className='p-4 text-xs font-medium text-slate-500'>Composición de Activos</td>
-                      {Object.entries(comparisonData.portfolios).map(([id, unknownP]) => {
-                        const p = unknownP as Portfolio;
-                        return (
-                          <td key={id} className='p-4 text-right text-xs'>
-                            <div className='flex flex-col gap-1 items-end max-w-[250px] ml-auto'>
-                              {p.allocations?.map((alloc, idx) => {
-                                const assetInfo = assets?.find(a => a.asset.ticker === alloc.ticker || a.asset.id === alloc.asset_id)?.asset;
-                                const cdtInfo = cdts?.find(c => c.cdt.id === alloc.cdt_id)?.cdt;
-                                const displayName = alloc.cdt_id
-                                  ? `CDT ${cdtInfo?.institution?.name || 'Banco'} (${cdtInfo?.plazo_dias || 180}D)`
-                                  : (assetInfo?.ticker || alloc.ticker || `Activo ${alloc.asset_id || idx + 1}`);
-                                return (
-                                  <span key={idx} className='bg-slate-50 border border-slate-100 rounded px-2 py-0.5 text-[9px] text-slate-500 font-mono'>
-                                    {displayName}: {alloc.weight_percentage}%
-                                  </span>
-                                );
-                              })}
-                            </div>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            ) : null}
-          </div>
-        </motion.div>
-      </div>
-    </AnimatePresence>
-  );
-};
 
 interface PortfoliosViewProps {
   onViewChange: (view: string) => void;

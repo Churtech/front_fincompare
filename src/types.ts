@@ -366,14 +366,7 @@ export interface RetrospectiveResult {
   calculated_at: string;
 }
 
-// --- Portfolio Comparison ---
-export interface PortfolioComparison {
-  portfolios: Record<number, Portfolio>;
-  best_return: string;
-  best_sharpe: string;
-  best_diversification: string;
-}
-
+// --- ApiResponse ---
 export interface ApiResponse<T> {
   data: T;
   meta?: any;

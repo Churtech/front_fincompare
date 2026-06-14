@@ -19,7 +19,6 @@ import {
   AnalysisReport,
   RetrospectiveRequest,
   RetrospectiveResult,
-  PortfolioComparison,
   AssetHighlightsResponse,
   DashboardSummaryResponse
 } from '../types';
@@ -272,10 +271,20 @@ export const useAssetAnalysis = (
 };
 
 // --- Portfolio Comparison ---
-export const useComparePortfolios = () => {
+export interface CompareAnalysisRequest {
+  portfolio_ids: number[];
+  currency?: string;
+  lookback_days?: number;
+  lookback?: number;
+  initial_amount?: number;
+  monthly_contribution?: number;
+  projection_years?: number;
+}
+
+export const useCompareAnalysis = () => {
   return useMutation({
-    mutationFn: async (portfolioIds: number[]) => {
-      const { data } = await api.post<ApiResponse<PortfolioComparison>>('/portfolios/compare', { portfolio_ids: portfolioIds });
+    mutationFn: async (payload: CompareAnalysisRequest) => {
+      const { data } = await api.post<AnalysisReport>('/compare/analysis', payload);
       return data;
     },
   });
