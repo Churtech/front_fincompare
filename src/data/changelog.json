@@ -1,4 +1,20 @@
 {
+  "1.1.3": {
+    "title": "Precisión en Métricas",
+    "description": "Afinamos el Dashboard para mostrarte la realidad exacta del mercado local:",
+    "features": [
+      {
+        "icon": "Award",
+        "title": "Tasa Promedio Real",
+        "desc": "Reemplazamos la tasa de intervención teórica por el promedio bancario real (360D), reflejando exactamente lo que el mercado está ofreciendo hoy."
+      },
+      {
+        "icon": "TrendingUp",
+        "title": "Trayectorias Sincronizadas",
+        "desc": "Las gráficas comparativas ahora enfrentan el mercado accionario contra el promedio comercial real, dándote proyecciones mucho más útiles y aplicables."
+      }
+    ]
+  },
   "1.1.2": {
     "title": "Navegación Optimizada",
     "description": "Hemos reestructurado el panel lateral para hacer tu experiencia de análisis más intuitiva y fluida:",

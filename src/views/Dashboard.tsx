@@ -66,8 +66,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
   const currentHighlights = activeHighlightTab === 'etf' ? etfHighlights : stockHighlights;
 
   // Best CDT metrics extracted from consolidated MarketMetrics
-  const bestCDTValue = metrics?.best_cdt_rate;
-  const bestCDTEntity = metrics?.best_cdt_entity;
+  const cdtAverageValue = metrics?.cdt_average_360d;
   const trmMetrics = undefined; // TRM metrics already present in metrics via trm_current/trm_change_7d
 
   // Obtener histórico real del mejor ETF para la trayectoria
@@ -230,7 +229,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
   // Cálculo de trayectorias normalizadas (Base 100 vs Base 100)
   const chartData = useMemo(() => {
     const hasHistory = history.length > 0;
-    const hasCDT = isValidNumber(bestCDTValue);
+    const hasCDT = isValidNumber(cdtAverageValue);
     
     // Si no hay datos, devolvemos series vacías
     if (!hasHistory && !hasCDT) return { cdt: [], etf: [], dates: [] };
@@ -250,7 +249,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
     // Proyección CDT (Simulada día a día para que coincida con los puntos del ETF)
     let cdtTrajectory: number[] = [];
     if (hasCDT) {
-      const rate = bestCDTValue! / 100;
+      const rate = cdtAverageValue! / 100;
       const dailyRate = Math.pow(1 + rate, 1 / 365) - 1;
       
       cdtTrajectory = dates.map((_, index) => {
@@ -260,7 +259,7 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
     }
 
     return { cdt: cdtTrajectory, etf: etfTrajectory, dates };
-  }, [bestCDTValue, history]);
+  }, [cdtAverageValue, history]);
 
   const chartOption = {
     backgroundColor: 'transparent',
@@ -523,11 +522,11 @@ const Dashboard: React.FC<DashboardProps> = ({ onViewChange }) => {
           color='primary'
         />
         <StatCard
-          label='Mejor Tasa CDT'
-          value={loadingCDT ? '...' : (isValidNumber(bestCDTValue) ? bestCDTValue.toFixed(2) : '0.00')}
+          label='Tasa Promedio CDTs'
+          value={loadingCDT ? '...' : (isValidNumber(cdtAverageValue) ? cdtAverageValue.toFixed(2) : '0.00')}
           suffix='% E.A.'
-          subtitle={bestCDTEntity || 'CDT Colombia'}
-          tooltip="La tasa de interés anualizada más alta actualmente reportada en el simulador de CDTs."
+          subtitle="Promedio Bancario (360D)"
+          tooltip="Promedio de las tasas anualizadas ofrecidas por los bancos e instituciones financieras para plazos de 360 días."
           icon={Award}
           color='emerald'
           onClick={() => onViewChange?.('cdts')}
