@@ -1,4 +1,20 @@
 {
+  "1.1.2": {
+    "title": "Navegación Optimizada",
+    "description": "Hemos reestructurado el panel lateral para hacer tu experiencia de análisis más intuitiva y fluida:",
+    "features": [
+      {
+        "icon": "LayoutDashboard",
+        "title": "Nueva Arquitectura Visual",
+        "desc": "Agrupamos las herramientas en secciones estratégicas (Mercados, Estrategia, y Datos) para que encuentres lo que necesitas al instante."
+      },
+      {
+        "icon": "TrendingUp",
+        "title": "Claridad Institucional",
+        "desc": "Renombramos y reorganizamos los bloques para separar claramente la inteligencia y observación de mercado, de nuestros simuladores matemáticos."
+      }
+    ]
+  },
   "1.1.1": {
     "title": "Hotfix de Estabilidad",
     "description": "Hemos actualizado la plataforma con mejoras enfocadas en darte una experiencia mucho más rápida y confiable:",

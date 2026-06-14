@@ -23,20 +23,45 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
     }
   };
 
-  const menuItems = [
-    { id: 'dashboard', label: 'Panorama General', icon: LayoutDashboard },
-    { id: 'cdts', label: 'CDTs & Renta Fija', icon: Wallet },
-    { id: 'assets', label: 'Acciones & ETFs', icon: BarChart3 },
-    { id: 'portfolios', label: 'Simulador Portafolios', icon: Briefcase },
-    { id: 'retrospective', label: 'Simulador Retrospectivo', icon: History },
-    { id: 'scenarios', label: 'Simulador de Escenarios', icon: TrendingUp },
-    { id: 'compare', label: 'Comparativa Real', icon: ArrowLeftRight },
-    { id: 'correlations', label: 'Correlaciones', icon: PieChart },
-    { id: 'metrics', label: 'Métricas de Mercado', icon: TrendingUp },
+  const menuGroups = [
+    {
+      title: 'Principal',
+      items: [
+        { id: 'dashboard', label: 'Panorama General', icon: LayoutDashboard },
+      ]
+    },
+    {
+      title: 'Mercados y Activos',
+      items: [
+        { id: 'cdts', label: 'CDTs & Renta Fija', icon: Wallet },
+        { id: 'assets', label: 'Acciones & ETFs', icon: BarChart3 },
+      ]
+    },
+    {
+      title: 'Análisis Avanzado y Estrategia',
+      items: [
+        { id: 'portfolios', label: 'Simulador Portafolios', icon: Briefcase },
+        { id: 'retrospective', label: 'Simulador Retrospectivo', icon: History },
+        { id: 'scenarios', label: 'Simulador de Escenarios', icon: TrendingUp },
+      ]
+    },
+    {
+      title: 'Exploración de Datos',
+      items: [
+        { id: 'compare', label: 'Comparativa Real', icon: ArrowLeftRight },
+        { id: 'correlations', label: 'Correlaciones', icon: PieChart },
+        { id: 'metrics', label: 'Métricas de Mercado', icon: TrendingUp },
+      ]
+    }
   ];
 
   if (user?.email === 'juanesteban.paezalbarracin@gmail.com') {
-    menuItems.push({ id: 'sys-ops', label: 'Administración', icon: ShieldCheck });
+    menuGroups.push({
+      title: 'Sistema',
+      items: [
+        { id: 'sys-ops', label: 'Administración', icon: ShieldCheck }
+      ]
+    });
   }
 
   return (
@@ -85,35 +110,44 @@ const Sidebar: React.FC<SidebarProps> = ({ currentView, onViewChange }) => {
               </div>
 
               <div className="space-y-8">
-                <nav className="space-y-1">
-                  {menuItems.map((item) => {
-                    const isActive = currentView === item.id;
-                    const Icon = item.icon;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => {
-                          onViewChange(item.id);
-                          if (window.innerWidth < 1024) setIsOpen(false);
-                        }}
-                        className={cn(
-                          "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group relative text-left",
-                          isActive
-                            ? 'bg-primary text-white shadow-lg shadow-primary/10'
-                            : 'text-slate-500 hover:bg-slate-50 hover:text-primary'
-                        )}
-                      >
-                        <Icon size={18} className={cn(isActive ? "text-white" : "text-slate-400 group-hover:text-primary")} />
-                        <span className="text-sm font-medium tracking-tight">{item.label}</span>
-                        {isActive && (
-                          <motion.div
-                            layoutId="active-pill"
-                            className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
-                          />
-                        )}
-                      </button>
-                    );
-                  })}
+                <nav className="space-y-6">
+                  {menuGroups.map((group, idx) => (
+                    <div key={idx}>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 px-4">
+                        {group.title}
+                      </p>
+                      <div className="space-y-1">
+                        {group.items.map((item) => {
+                          const isActive = currentView === item.id;
+                          const Icon = item.icon;
+                          return (
+                            <button
+                              key={item.id}
+                              onClick={() => {
+                                onViewChange(item.id);
+                                if (window.innerWidth < 1024) setIsOpen(false);
+                              }}
+                              className={cn(
+                                "w-full flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group relative text-left",
+                                isActive
+                                  ? 'bg-primary text-white shadow-lg shadow-primary/10'
+                                  : 'text-slate-500 hover:bg-slate-50 hover:text-primary'
+                              )}
+                            >
+                              <Icon size={18} className={cn(isActive ? "text-white" : "text-slate-400 group-hover:text-primary")} />
+                              <span className="text-sm font-medium tracking-tight">{item.label}</span>
+                              {isActive && (
+                                <motion.div
+                                  layoutId="active-pill"
+                                  className="absolute right-2 w-1.5 h-1.5 bg-white rounded-full"
+                                />
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  ))}
                 </nav>
 
                 <div className="pt-8 border-t border-slate-50 space-y-6">
