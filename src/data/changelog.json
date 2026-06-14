@@ -1,0 +1,23 @@
+{
+  "1.1.1": {
+    "title": "Hotfix de Estabilidad",
+    "description": "Hemos actualizado la plataforma con mejoras enfocadas en darte una experiencia mucho más rápida y confiable:",
+    "features": [
+      {
+        "icon": "Zap",
+        "title": "Experiencia más fluida",
+        "desc": "Solucionamos un inconveniente que podía ralentizar la pantalla al comparar portafolios. Ahora la navegación y los tiempos de espera son inmediatos."
+      },
+      {
+        "icon": "Sparkles",
+        "title": "Cálculos más precisos",
+        "desc": "Mejoramos nuestros motores internos para manejar los montos de inversión con exactitud milimétrica, asegurando simulaciones 100% fiables."
+      },
+      {
+        "icon": "ShieldCheck",
+        "title": "Plataforma más estable",
+        "desc": "Optimizamos los procesos de fondo para que la terminal sea más robusta y mantenga un rendimiento óptimo durante tus análisis diarios."
+      }
+    ]
+  }
+}
